@@ -23,3 +23,12 @@ struct DetailView: View {
         }
     }
 }
+
+#Preview {
+    DetailView(selectedCard:
+            .init(number: "$234324234 234 2 42",
+                  expires: "23/23",
+                  color: .blue,
+                  balance: 121241,
+                  owner: User(name: "John"), cardImage: "Visa"))
+}

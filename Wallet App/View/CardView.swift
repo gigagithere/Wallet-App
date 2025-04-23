@@ -78,3 +78,22 @@ import SwiftUI
             }
         }
     }
+#Preview {
+    @Previewable @State var showDetailView = false
+    @Previewable @State var selectedCard: Card? = nil
+    @Previewable @Namespace var animation
+
+    CardView(
+        card: Card(
+            number: "1233 3123 4124 1322",
+            expires: "02/23",
+            color: .blue,
+            balance: 2323.94,
+            owner: User(name: "John Doe"),
+            cardImage: "unionpay"
+        ),
+        showDetailView: $showDetailView,
+        selectedCard: $selectedCard,
+        animation: animation
+    )
+}

@@ -36,13 +36,15 @@ struct Home: View {
                 
                 /// Cards View
                 let mainOffset = CGFloat(cards.firstIndex(where: { $0.id == selectedCard?.id }) ?? 0) * -size.width
+               
                 LazyVStack(spacing: 10) {
                     ForEach(cards) { card in
-                        let cardOffset = CGFloat(cards.firstIndex(where: { $0.id == card.id }) ?? 0) * size.width;     CardView(card: card, showDetailView: $showDetailView, selectedCard: $selectedCard, animation: animation)
+                        let cardOffset = CGFloat(cards.firstIndex(where: { $0.id == card.id }) ?? 0) * size.width
+                            CardView(card: card, showDetailView: $showDetailView, selectedCard: $selectedCard, animation: animation)
                             .frame(width: showDetailView ? size.width : nil)
-                            .visualEffect { [showDetailView] content, proxy in
+                            .visualEffect { content, proxy in
                                 content
-                                    .offset(x: showDetailView ? cardOffset : 0, y: showDetailView ? -proxy.frame(in: .scrollView).minY : 0)
+                                    .offset(x: showDetailView ? cardOffset : 0, y: showDetailView ? -proxy.frame(in: .global).minY : 0)
                             }
                     }
                 }
