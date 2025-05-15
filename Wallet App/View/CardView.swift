@@ -1,99 +1,127 @@
 //
-//  CardView.swift
+//  Home.swift
 //  Wallet App
 //
-//  Created by Bartosz Mrugała on 08/04/2025.
+//  Created by Bartosz Mrugała on 31/03/2025.
 //
 
 import SwiftUI
+import SwiftData
 
- struct CardView: View {
-        let card: Card
-        @Binding var showDetailView: Bool
-        @Binding var selectedCard: Card?
-        var animation: Namespace.ID
-        
-        var body: some View {
-            ZStack {
-                Rectangle()
-                    .fill(card.color.gradient)
-                
-                VStack(alignment: .leading, spacing: 15) {
-                    // Jedno wywołanie CardImageView – nie duplikujemy go
-                    CardImageView(card: card, animation: animation)
-                        .offset(y: showDetailView ? 70 : 0)
-                    
-                    VStack(alignment: .center, spacing: 4) {
-                        Text(card.number)
-                            .font(.caption)
-                            .foregroundStyle(.white.secondary)
-                        
-                        Text("$ \(card.balance, specifier: "%.2f")")
-                            .font(.title2.bold())
-                            .foregroundStyle(.white)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity,
-                           alignment: showDetailView ? .center : .leading)
-                    .overlay {
-                        // Overlay pozostawia tylko przycisk powrotu, gdy widok szczegółowy jest aktywny
-                        if let selectedCard, selectedCard.id == card.id, showDetailView {
+struct CardView: View {
+    let card: Card
+    @Binding var showDetailView: Bool
+    @Binding var selectedCard: Card?
+    let safeArea: EdgeInsets
+    let animation: Namespace.ID
+    @State private var showContextMenu = false
+    var isPreview: Bool = false
+    var onEdit: ((Card) -> Void)? = nil
+    var onDelete: ((Card) -> Void)? = nil
+    
+    var body: some View {
+        ZStack {
+            Rectangle()
+                .fill(card.color.gradient)
+
+            VStack(alignment: .leading, spacing: 15) {
+                if !showDetailView {
+                    CardImageView(
+                        card: card,
+                        id: card.imageGeometryID,
+                        height: 20,
+                        animation: animation
+                    )
+                }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(card.number)
+                        .font(.caption)
+                        .foregroundStyle(.white.secondary)
+
+                    Text(
+                        card.balance,
+                        format: .currency(code: Locale.current.currency?.identifier ?? "USD")
+                    )
+                    .font(.title2.bold())
+                    .foregroundStyle(.white)
+                }
+                .frame(
+                    maxWidth: .infinity,
+                    maxHeight: .infinity,
+                    alignment: showDetailView ? .center : .leading
+                )
+                .overlay {
+                    ZStack {
+                        if showDetailView && !isPreview {
+                            CardImageView(
+                                card: card,
+                                id: card.imageGeometryID,
+                                height: 20,
+                                animation: animation
+                            )
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .offset(y: 45)
+                        }
+
+                        if let selected = selectedCard, selected.id == card.id, showDetailView, !isPreview {
                             Button {
                                 withAnimation(.smooth(duration: 0.5, extraBounce: 0)) {
-                                    self.selectedCard = nil
+                                    selectedCard = nil
                                     showDetailView = false
                                 }
                             } label: {
                                 Image(systemName: "chevron.left")
                                     .font(.title3.bold())
                                     .foregroundStyle(.white)
-                                    .contentShape(Rectangle())
+                                    .contentShape(.rect)
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .transition(.asymmetric(insertion: .opacity, removal: .identity))
-                            .offset(y: -45)
                         }
                     }
-                    
-                    HStack {
-                        Text("Expires: \(card.expires)")
-                            .font(.caption)
-                        
-                        Spacer()
-                        
-                        Text(card.owner.name)
-                            .font(.callout)
-                    }
-                    .foregroundStyle(.white.secondary)
                 }
-                .padding(25)
+                .padding(.top, (showDetailView  && !isPreview) ? safeArea.top - 10 : 0)
+
+                HStack {
+                    Text("Expires " + card.expires)
+                        .font(.caption)
+                    Spacer()
+                    Text(card.ownerName)
+                        .font(.callout)
+                }
+                .foregroundStyle(.white.secondary)
             }
-            .frame(height: showDetailView ? 160 : 220)
-            .clipShape(RoundedRectangle(cornerRadius: showDetailView ? 0 : 25))
-            .onTapGesture {
-                guard !showDetailView else { return }
-                withAnimation(.smooth(duration: 0.5, extraBounce: 0)) {
-                    selectedCard = card
-                    showDetailView = true
-                }
+            .padding(showDetailView ? 15 : 25)
+        }
+        .frame(
+            height: showDetailView ? safeArea.top + 130 : 200,
+            alignment: .top
+        )
+        .clipShape(
+            RoundedRectangle(cornerRadius: showDetailView ? 0 : 25)
+        )
+        .onTapGesture {
+            guard !showDetailView, !isPreview else { return }
+            withAnimation(.smooth(duration: 0.5, extraBounce: 0)) {
+                selectedCard = card
+                showDetailView = true
             }
         }
+        .onLongPressGesture {
+            showContextMenu = true
+        }
+        .confirmationDialog("Choose an action", isPresented: $showContextMenu, titleVisibility: .visible) {
+            Button("Edit", role: .none) {
+                onEdit?(card)
+            }
+            Button("Delete", role: .destructive) {
+                onDelete?(card)
+            }
+            Button("Cancel", role: .cancel) {}
+        }
     }
-#Preview {
-    @Previewable @State var showDetailView = false
-    @Previewable @State var selectedCard: Card? = nil
-    @Previewable @Namespace var animation
-
-    CardView(
-        card: Card(
-            number: "1233 3123 4124 1322",
-            expires: "02/23",
-            color: .blue,
-            balance: 2323.94,
-            owner: User(name: "John Doe"),
-            cardImage: "unionpay"
-        ),
-        showDetailView: $showDetailView,
-        selectedCard: $selectedCard,
-        animation: animation
-    )
 }
+//#Preview {
+//    CardView(card: <#Card#>, showDetailView: <#Binding<Bool>#>, selectedCard: <#Binding<Card?>#>, safeArea: <#EdgeInsets#>, animation: <#Namespace.ID#>)
+//}

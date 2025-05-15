@@ -6,16 +6,19 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct CardImageView: View {
     let card: Card
-    var animation: Namespace.ID
-    
+    let id: String
+    let height: CGFloat
+    let animation: Namespace.ID
+
     var body: some View {
         Image(card.cardImage)
             .resizable()
             .aspectRatio(contentMode: .fit)
-            .matchedGeometryEffect(id: card.id, in: animation)
-            .frame(width: 70, height: 50)
+            .matchedGeometryEffect(id: id, in: animation)
+            .frame(height: height)
     }
 }

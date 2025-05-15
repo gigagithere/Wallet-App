@@ -13,5 +13,6 @@ struct Wallet_AppApp: App {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(for: [Card.self, UserProfile.self])
     }
 }

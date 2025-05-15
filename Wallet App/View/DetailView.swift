@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-
+import SwiftData
 struct DetailView: View {
     var selectedCard: Card
     
@@ -25,10 +25,15 @@ struct DetailView: View {
 }
 
 #Preview {
-    DetailView(selectedCard:
-            .init(number: "$234324234 234 2 42",
-                  expires: "23/23",
-                  color: .blue,
-                  balance: 121241,
-                  owner: User(name: "John"), cardImage: "Visa"))
+    DetailView(
+        selectedCard: Card(
+            number: "1234 5678 9012 3456",
+            expires: "12/26",
+            color: .blue,
+            balance: 1234.56,
+            ownerName: "John Doe",
+            cardImage: "visa"
+        )
+    )
+    .modelContainer(for: Card.self)
 }
