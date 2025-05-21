@@ -8,6 +8,8 @@
 import Foundation
 import SwiftData
 
+//swifdtatamoze nie wszedzie potrzbene jest
+
 @Model
 final class UserProfile {
     @Attribute var fullName: String

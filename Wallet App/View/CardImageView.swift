@@ -22,3 +22,26 @@ struct CardImageView: View {
             .frame(height: height)
     }
 }
+#Preview {
+    struct CardImageViewPreviewWrapper: View {
+        @Namespace var ns
+
+        var body: some View {
+            CardImageView(
+                card: Card(
+                    number: "1234 5678 9012 3456",
+                    expires: "12/26",
+                    color: .blue,
+                    balance: 1234.56,
+                    ownerName: "John Doe",
+                    cardImage: "visa"
+                ),
+                id: "VISA_PREVIEW",
+                height: 40,
+                animation: ns
+            )
+        }
+    }
+
+    return CardImageViewPreviewWrapper()
+}

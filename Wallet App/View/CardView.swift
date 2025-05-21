@@ -61,7 +61,7 @@ struct CardView: View {
                                 animation: animation
                             )
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .offset(y: 45)
+                            .offset(y: 35)
                         }
 
                         if let selected = selectedCard, selected.id == card.id, showDetailView, !isPreview {
@@ -77,6 +77,7 @@ struct CardView: View {
                                     .contentShape(.rect)
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
+                            .offset(y: -20)
                             .transition(.asymmetric(insertion: .opacity, removal: .identity))
                         }
                     }
@@ -101,6 +102,7 @@ struct CardView: View {
         .clipShape(
             RoundedRectangle(cornerRadius: showDetailView ? 0 : 25)
         )
+        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 4)
         .onTapGesture {
             guard !showDetailView, !isPreview else { return }
             withAnimation(.smooth(duration: 0.5, extraBounce: 0)) {
@@ -122,6 +124,31 @@ struct CardView: View {
         }
     }
 }
-//#Preview {
-//    CardView(card: <#Card#>, showDetailView: <#Binding<Bool>#>, selectedCard: <#Binding<Card?>#>, safeArea: <#EdgeInsets#>, animation: <#Namespace.ID#>)
-//}
+
+#Preview {
+    struct PreviewWrapper: View {
+        @State private var show = false
+        @State private var selected: Card? = nil
+        @Namespace private var ns
+
+        var body: some View {
+            CardView(
+                card: Card(
+                    number: "1234 5678 9012 3456",
+                    expires: "12/26",
+                    color: .blue,
+                    balance: 1234.56,
+                    ownerName: "John Doe",
+                    cardImage: "visa"
+                ),
+                showDetailView: $show,
+                selectedCard: $selected,
+                safeArea: EdgeInsets(top: 20, leading: 0, bottom: 0, trailing: 0),
+                animation: ns,
+                isPreview: false
+            )
+        }
+    }
+
+    return PreviewWrapper()
+}

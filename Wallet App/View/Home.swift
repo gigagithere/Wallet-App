@@ -9,6 +9,8 @@ import SwiftUI
 import SwiftData
 
 struct Home: View {
+    @Environment(\.appThemeStyle) private var theme
+    
     var size: CGSize
     var safeArea: EdgeInsets
     
@@ -25,76 +27,81 @@ struct Home: View {
     @Query private var allCards: [Card]
     
     var body: some View {
-        ScrollView(.vertical) {
-            LazyVStack(spacing: 0) {
-                Text("Wallet App")
-                    .font(.title2.bold())
-                    .frame(maxWidth: .infinity)
-                    .overlay(alignment: .trailing) {
-                        Button {
-                            showProfileView = true
-                        } label: {
-                            Image(systemName: "person")
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: 25, height: 25)
-                        }
-                    }
-                    .overlay(alignment: .leading) {
-                        Button {
-                            cardToEdit = nil
-                            showAddCardSheet = true
-                        } label: {
-                            Image(systemName: "plus")
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: 25, height: 25)
-                        }
-                    }
-                    .blur(radius: showDetailView ? 5 : 0)
-                    .opacity(showDetailView ? 0 : 1)
-                
-                let selectedIndex = allCards.firstIndex { card in
-                    if let selectedCard = selectedCard {
-                        return card.id == selectedCard.id
-                    }
-                    return false
-                } ?? 0
-                let mainOffset = CGFloat(selectedIndex) * -size.width
-                
-                LazyVStack(spacing: 10) {
-                    ForEach(allCards) { card in
-                        let cardOffset = CGFloat(allCards.firstIndex(where: { $0.id == card.id }) ?? 0) * size.width
-                        CardView(
-                            card: card,
-                            showDetailView: $showDetailView,
-                            selectedCard: $selectedCard,
-                            safeArea: safeArea,
-                            animation: animation,
-                            onEdit: { selected in
-                                cardToEdit = selected
-                                showAddCardSheet = true
-                            },
-                            onDelete: { selected in
-                                modelContext.delete(selected)
+            ZStack {
+                theme.backgroundGradient.ignoresSafeArea()
+                ScrollView(.vertical) {
+                LazyVStack(spacing: 0) {
+                    Text("Wallet App")
+                        .font(.title2.bold())
+                        .frame(maxWidth: .infinity)
+                        .overlay(alignment: .trailing) {
+                            Button {
+                                showProfileView = true
+                            } label: {
+                                Image(systemName: "person")
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 25, height: 25)
                             }
-                        )
-                        .frame(width: showDetailView ? size.width : nil)
-                        .visualEffect { [showDetailView] content, proxy in
-                            content
-                                .offset(
-                                    x: showDetailView ? cardOffset : 0,
-                                    y: showDetailView ? -proxy.frame(in: .scrollView).minY : 0
-                                )
+                        }
+                        .overlay(alignment: .leading) {
+                            Button {
+                                cardToEdit = nil
+                                showAddCardSheet = true
+                            } label: {
+                                Image(systemName: "plus")
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 25, height: 25)
+                            }
+                        }
+                        .blur(radius: showDetailView ? 5 : 0)
+                        .opacity(showDetailView ? 0 : 1)
+                    
+                    let selectedIndex = allCards.firstIndex { card in
+                        if let selectedCard = selectedCard {
+                            return card.id == selectedCard.id
+                        }
+                        return false
+                    } ?? 0
+                    let mainOffset = CGFloat(selectedIndex) * -size.width
+                    
+                    LazyVStack(spacing: 10) {
+                        ForEach(allCards) { card in
+                            let cardOffset = CGFloat(allCards.firstIndex(where: { $0.id == card.id }) ?? 0) * size.width
+                            CardView(
+                                card: card,
+                                showDetailView: $showDetailView,
+                                selectedCard: $selectedCard,
+                                safeArea: safeArea,
+                                animation: animation,
+                                onEdit: { selected in
+                                    cardToEdit = selected
+                                    showAddCardSheet = true
+                                },
+                                onDelete: { selected in
+                                    modelContext.delete(selected)
+                                }
+                            )
+                            .frame(width: showDetailView ? size.width : nil)
+                            .visualEffect { [showDetailView] content, proxy in
+                                content
+                                    .offset(
+                                        x: showDetailView ? cardOffset : 0,
+                                        y: showDetailView ? -proxy.frame(in: .scrollView).minY : 0
+                                    )
+                            }
                         }
                     }
+                    .padding(.top, 25)
+                    .offset(x: showDetailView ? mainOffset : 0)
                 }
-                .padding(.top, 25)
-                .offset(x: showDetailView ? mainOffset : 0)
+                .safeAreaPadding(15)
+                .safeAreaPadding(.top, safeArea.top)
             }
-            .safeAreaPadding(15)
-            .safeAreaPadding(.top, safeArea.top)
         }
+        .foregroundColor(theme.textColor)
+        .accentColor(theme.accentColor)
         .scrollDisabled(showDetailView)
         .scrollIndicators(.hidden)
         .overlay {
